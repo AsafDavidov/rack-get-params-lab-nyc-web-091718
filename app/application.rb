@@ -1,6 +1,7 @@
 class Application
 
   @@items = ["Apples","Carrots","Pears"]
+  @@cart = []
 
   def call(env)
     resp = Rack::Response.new
@@ -13,12 +14,24 @@ class Application
     elsif req.path.match(/search/)
       search_term = req.params["q"]
       resp.write handle_search(search_term)
+
+    elsif req.path.match(/cart/)
+      if @@cart.empty? == false
+        @@cart.each do |cart_i|
+          resp.write "#{cart_i}\n"
+        end
+      else
+        resp.write "Your cart is empty"
+      end
+    elsif req.path.match(/add/)
+      item_to_add = req.params['item']
+      resp.write add_item_to_cart(item_to_add)
     else
       resp.write "Path Not Found"
     end
 
     resp.finish
-  end
+end
 
   def handle_search(search_term)
     if @@items.include?(search_term)
@@ -27,4 +40,14 @@ class Application
       return "Couldn't find #{search_term}"
     end
   end
+
+  def add_item_to_cart(i_t_a)
+    if @@items.include?(i_t_a)
+      @@cart << i_t_a
+      return "added #{i_t_a}"
+    else
+      return "We don't have that item"
+    end
+  end
+
 end
